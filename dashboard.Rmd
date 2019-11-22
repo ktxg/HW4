@@ -1,0 +1,88 @@
+---
+title: "NYC Restaurant Review Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill   
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(viridis)
+library(p8105.datasets)
+
+library(plotly)
+```
+
+
+```{r include = FALSE}
+nyc_inspec = read_csv(file = "./data/nyc_inspec.csv")
+
+set.seed(1)
+nyc_inspec
+
+nyc_inspec = 
+  nyc_inspec %>% 
+  select(
+    boro, critical_flag, cuisine_description, score, violation_description, latitude, longitude, grade) %>%
+  filter(
+    !is.na(score), 
+    !is.na(violation_description), 
+    boro == "Manhattan", 
+    grade == "A", 
+    latitude != 0, 
+    longitude != 0) %>% 
+  sample_n(5000)
+
+## we will be looking at 5,000 randomly chosen restaurants in the Manhattan borough that have an 'A' rating 
+```
+
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Restaurant score ratings for different cuisines in Manhattan 
+This is a boxplot that shows the score ratings for different cuisines. Scores are converted into grades, where a lower score earns a higher grade. These are all 'A' grade restaurants, so we can compare the scores. 
+```{r}
+nyc_inspec %>% 
+  mutate(cuisine_description = fct_reorder(cuisine_description, score)) %>% 
+  plot_ly(y = ~score, color = ~cuisine_description, type = "box",
+          colors = "Set2") 
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Restaurant location and score ratings in Manhattan
+ 
+```{r}
+scatter_ggplot = 
+  nyc_inspec %>% 
+  ggplot(aes(x = latitude, y = longitude, color = score)) + 
+  geom_point(alpha = 0.5) + 
+  scale_color_viridis() +
+  coord_cartesian() + 
+  theme_classic() 
+
+ggplotly(scatter_ggplot) 
+
+## below is the plotly way to do it, but it doesn't show the 'score' when you hover over the dots, so that's why I went with the ggplotly graph instead 
+
+##nyc_inspec %>% 
+##  plot_ly(x = ~latitude, y = ~longitude, type = "scatter", mode = "markers", 
+##          color = ~score, alpha = 0.5)
+```
+
+### Number of 'A' grade restaurants by cuisine in Manhattan
+This is a barchart that shows a count of different types of cuisines in Manhattan that have an 'A' rating. 
+```{r}
+nyc_inspec %>% 
+  count(cuisine_description) %>% 
+  mutate(cuisine_description = fct_reorder(cuisine_description, n)) %>% 
+  plot_ly(x = ~cuisine_description, y = ~n, type = "bar")
+
+## this is taken from the random sampling of 5,000 restaurants we seeded 
+## I took out color = ~cuisine_description so that we could better see the graph 
+```
+
