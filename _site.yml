@@ -1,0 +1,18 @@
+name: "Yay internet!"
+output_dir: "."
+navbar:
+  title: "Home"
+  right:
+    - text: "Experience"
+      href: experience.html
+    - text: "Dashboard"
+      href: dashboard.html
+    - icon: fa-envelope fa-lg
+      href: mailto:<kxg2002@cumc.columbia.edu>
+    - icon: fab fa-fw fa-linkedin
+      href: https://www.linkedin.com/in/katiexgao/
+    - icon: fa-github fa-lg
+      href: https://github.com/ktxg
+output:
+  html_document:
+    theme: simplex
